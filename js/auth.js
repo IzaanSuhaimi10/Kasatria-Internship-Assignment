@@ -1,5 +1,4 @@
 // js/auth.js
-// Google Sign-In using NEW Google Identity Services (GIS)
 
 let tokenClient;
 let accessToken = null;
@@ -120,4 +119,5 @@ window.addEventListener('load', () => {
             alert('Failed to load Google Sign-In. Please refresh the page.');
         }
     }, 1000);
+
 });
