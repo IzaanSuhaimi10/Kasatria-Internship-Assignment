@@ -1,5 +1,4 @@
 // js/config.js
-// ⚠️ REPLACE THESE WITH YOUR ACTUAL CREDENTIALS ⚠️
 
 const CONFIG = {
     // Your Google OAuth Client ID from Google Cloud Console
@@ -20,5 +19,6 @@ const CONFIG = {
     // Authorization scopes required
     SCOPES: 'https://www.googleapis.com/auth/spreadsheets.readonly'
 };
+
 
 console.log('✅ Config loaded');
