@@ -12,7 +12,7 @@ function loadSheetData() {
     
     gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: CONFIG.SHEET_ID,
-        range: `${CONFIG.SHEET_NAME}!A1:F202`, // Changed to A1 to include header
+        range: `${CONFIG.SHEET_NAME}!A1:F202`, 
     }).then((response) => {
         console.log('✅ Raw response from Sheets API:', response);
         const rows = response.result.values;
@@ -83,8 +83,6 @@ function showLoading(show) {
 
 // Parse net worth string to number (removes $ and commas)
 function parseNetWorth(netWorthString) {
-    // Remove $ and commas, then parse to float
-    // Example: "$251,260.80" becomes 251260.80
     return parseFloat(netWorthString.replace(/[$,]/g, ''));
 }
 
@@ -102,4 +100,5 @@ function getColorByNetWorth(netWorthString) {
     } else {
         return 'color-green';
     }
+
 }
