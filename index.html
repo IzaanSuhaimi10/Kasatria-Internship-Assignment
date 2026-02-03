@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src *; img-src * data:; frame-src *; style-src * 'unsafe-inline';">
+    <title>Kasatria 3D Visualization</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-container">
+        <div class="login-box">
+            <h1>Kasatria 3D Visualization</h1>
+            <p>Please sign in with your Google account to continue</p>
+            <button id="authorize-button" class="google-signin-button">
+                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo">
+                Sign in with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="main-app" class="hidden">
+        <!-- Control Panel -->
+        <div id="menu">
+            <button id="table" class="menu-button">
+                <span class="button-icon">📋</span> TABLE
+            </button>
+            <button id="sphere" class="menu-button">
+                <span class="button-icon">🌐</span> SPHERE
+            </button>
+            <button id="helix" class="menu-button">
+                <span class="button-icon">🧬</span> HELIX
+            </button>
+            <button id="grid" class="menu-button">
+                <span class="button-icon">📦</span> GRID
+            </button>
+            
+            <div class="user-info">
+                <span id="user-name"></span>
+                <button id="signout-button" class="signout-button">Sign Out</button>
+            </div>
+        </div>
+
+        <!-- 3D Container -->
+        <div id="container"></div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading data...</p>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <p>💡 <strong>Tip:</strong> Click and drag to rotate • Scroll to zoom • Click buttons to change layout</p>
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS3DRenderer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TrackballControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+    
+    <!-- Our files -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/sheets.js"></script>
+    <script src="js/visualization.js"></script>
+</body>
+</html>
