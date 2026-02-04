@@ -3,7 +3,7 @@
 let camera, scene, renderer;
 let controls;
 let objects = [];
-let targets = { table: [], sphere: [], helix: [], grid: [] };
+let targets = { table: [], sphere: [], helix: [], grid: [], pyramid: [] };
 
 function init3DVisualization() {
     // Create camera
@@ -90,27 +90,50 @@ function init3DVisualization() {
     }
 
     // HELIX layout - DOUBLE HELIX (as specified)
-    const helixRadius = 900;
-    for (let i = 0, l = objects.length; i < l; i++) {
-        const theta = i * 0.35 + Math.PI;
-        const y = -(i * 8) + 800;
-        
-        const object = new THREE.Object3D();
-        
-        // Create double helix by alternating between two helices
-        if (i % 2 === 0) {
-            // First helix
-            object.position.setFromCylindricalCoords(helixRadius, theta, y);
-        } else {
-            // Second helix (offset by PI)
-            object.position.setFromCylindricalCoords(helixRadius, theta + Math.PI, y);
-        }
-        
-        const vector = new THREE.Vector3(object.position.x, object.position.y, object.position.z);
-        object.lookAt(vector);
-        
-        targets.helix.push(object);
-    }
+    const vector = new THREE.Vector3();
+
+// First, we need to distribute elements between two strands
+// Split the 201 elements: 101 in first strand, 100 in second strand
+const halfPoint = Math.ceil(objects.length / 2);
+
+let helixIndex = 0;
+
+// FIRST STRAND - First half of elements
+for (let i = 0; i < halfPoint; i++) {
+    const theta = helixIndex * 0.175 + Math.PI;
+    const y = -(helixIndex * 8) + 800;
+
+    const object = new THREE.Object3D();
+    object.position.setFromCylindricalCoords(900, theta, y);
+
+    vector.x = object.position.x * 2;
+    vector.y = object.position.y;
+    vector.z = object.position.z * 2;
+    object.lookAt(vector);
+
+    targets.helix.push(object);
+    helixIndex++;
+}
+
+// Reset index for second strand
+helixIndex = 0;
+
+// SECOND STRAND - Second half of elements (offset by 180 degrees)
+for (let i = halfPoint; i < objects.length; i++) {
+    const theta = helixIndex * 0.175 + Math.PI + Math.PI; // +Math.PI adds 180° offset
+    const y = -(helixIndex * 8) + 800;
+
+    const object = new THREE.Object3D();
+    object.position.setFromCylindricalCoords(900, theta, y);
+
+    vector.x = object.position.x * 2;
+    vector.y = object.position.y;
+    vector.z = object.position.z * 2;
+    object.lookAt(vector);
+
+    targets.helix.push(object);
+    helixIndex++;
+}
 
     // GRID layout - 5x4x10 (as specified)
     for (let i = 0; i < objects.length; i++) {
@@ -126,6 +149,80 @@ function init3DVisualization() {
         
         targets.grid.push(object);
     }
+
+    // Tetrahedron vertices (4 faces pyramid)
+// We'll distribute elements on the faces of a tetrahedron
+const pyramidScale = 1200;
+const tetrahedronVertices = [
+    new THREE.Vector3(1, 1, 1).multiplyScalar(pyramidScale),       // vertex 0
+    new THREE.Vector3(-1, -1, 1).multiplyScalar(pyramidScale),     // vertex 1
+    new THREE.Vector3(-1, 1, -1).multiplyScalar(pyramidScale),     // vertex 2
+    new THREE.Vector3(1, -1, -1).multiplyScalar(pyramidScale)      // vertex 3
+];
+
+// Tetrahedron faces (triangles) - indices into vertices array
+const tetrahedronFaces = [
+    [2, 1, 0],  // face 0
+    [0, 3, 2],  // face 1
+    [1, 3, 0],  // face 2
+    [2, 3, 1]   // face 3
+];
+
+// Distribute elements across the 4 faces
+const elementsPerFace = Math.ceil(objects.length / 4);
+
+for (let i = 0; i < objects.length; i++) {
+    const object = new THREE.Object3D();
+    
+    // Determine which face this element belongs to
+    const faceIndex = Math.floor(i / elementsPerFace);
+    const indexInFace = i % elementsPerFace;
+    
+    // Get the three vertices of the current face
+    const face = tetrahedronFaces[Math.min(faceIndex, 3)]; // Cap at face 3
+    const v0 = tetrahedronVertices[face[0]];
+    const v1 = tetrahedronVertices[face[1]];
+    const v2 = tetrahedronVertices[face[2]];
+    
+    // Create a grid on the triangular face
+    const gridSize = Math.ceil(Math.sqrt(elementsPerFace));
+    const row = Math.floor(indexInFace / gridSize);
+    const col = indexInFace % gridSize;
+    
+    // Calculate barycentric coordinates (position on triangle)
+    // This ensures even distribution across the triangle
+    const maxRow = gridSize - 1 || 1;
+    const maxCol = gridSize - 1 || 1;
+    
+    // Normalized position (0 to 1)
+    let u = col / maxCol;
+    let v = row / maxRow;
+    
+    // Adjust to stay within triangle bounds
+    if (u + v > 1) {
+        u = 1 - u;
+        v = 1 - v;
+    }
+    
+    const w = 1 - u - v;
+    
+    // Calculate position using barycentric interpolation
+    object.position.x = v0.x * w + v1.x * u + v2.x * v;
+    object.position.y = v0.y * w + v1.y * u + v2.y * v;
+    object.position.z = v0.z * w + v1.z * u + v2.z * v;
+    
+    // Calculate face normal (perpendicular to triangle)
+    const edge1 = new THREE.Vector3().subVectors(v1, v0);
+    const edge2 = new THREE.Vector3().subVectors(v2, v0);
+    const normal = new THREE.Vector3().crossVectors(edge1, edge2).normalize();
+    
+    // Make element face outward from the face
+    const lookAtPoint = object.position.clone().add(normal.multiplyScalar(100));
+    object.lookAt(lookAtPoint);
+    
+    targets.pyramid.push(object);
+}
+
 
     // Create CSS3D renderer
     renderer = new THREE.CSS3DRenderer();
@@ -143,6 +240,7 @@ function init3DVisualization() {
     document.getElementById('sphere').addEventListener('click', () => transform(targets.sphere, 2000));
     document.getElementById('helix').addEventListener('click', () => transform(targets.helix, 2000));
     document.getElementById('grid').addEventListener('click', () => transform(targets.grid, 2000));
+    document.getElementById('pyramid').addEventListener('click', () => transform(targets.pyramid, 2000));
 
     // Start with table view
     transform(targets.table, 2000);
